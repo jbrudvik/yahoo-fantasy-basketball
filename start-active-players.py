@@ -1,15 +1,10 @@
 """
 Start active players for the week
-
-Ideas:
-- Include the names of players who cannot be started
-    - And maybe the full roster on those dates
 """
 
 import requests
 from bs4 import BeautifulSoup
 
-# TODO: Configure this somewhere better (as a direct argument to the script, probably
 TEAM_URL = 'http://basketball.fantasysports.yahoo.com/nba/178276/6/'
 
 headers = {
