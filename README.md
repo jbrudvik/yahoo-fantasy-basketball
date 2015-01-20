@@ -12,7 +12,7 @@
 
 ## Start active players
 
-    $ YAHOO_USERNAME=<username> YAHOO_PASSWORD=<password> python start-active-players.py
+    $ YAHOO_USERNAME=<username> YAHOO_PASSWORD=<password> python start-active-players.py <league_id> <team_id>
 
 ## Project matchup
 
