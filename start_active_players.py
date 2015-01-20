@@ -9,7 +9,8 @@ from bs4 import BeautifulSoup
 
 
 def usage():
-    sys.stderr.write('Usage: YAHOO_USERNAME=<username> YAHOO_PASSWORD=<password> %s\n' % sys.argv[0])
+    msg = 'Usage: YAHOO_USERNAME=<username> YAHOO_PASSWORD=<password> %s\n'
+    sys.stderr.write(msg % sys.argv[0])
     sys.exit(1)
 
 
