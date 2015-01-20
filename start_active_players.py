@@ -8,6 +8,12 @@ import sys
 from bs4 import BeautifulSoup
 
 
+TEAM_URL = 'http://basketball.fantasysports.yahoo.com/nba/178276/6/'
+
+DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
+AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
+
+
 def usage():
     msg = 'Usage: YAHOO_USERNAME=<username> YAHOO_PASSWORD=<password> %s\n'
     sys.stderr.write(msg % sys.argv[0])
@@ -15,11 +21,6 @@ def usage():
 
 
 def start_active_players(username, password):
-    TEAM_URL = 'http://basketball.fantasysports.yahoo.com/nba/178276/6/'
-
-    DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
-    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
-
     headers = {
         'user-agent': DESKTOP_USER_AGENT
     }
@@ -27,8 +28,6 @@ def start_active_players(username, password):
     soup = BeautifulSoup(response.text)
     inputs = soup.find(id='hiddens').findAll('input')
     fields = {input['name']: input['value'] for input in inputs}
-
-    print(fields)
 
 
 def main():
