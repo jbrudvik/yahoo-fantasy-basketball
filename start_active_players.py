@@ -6,6 +6,7 @@ import requests
 import os
 import sys
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 
 YAHOO_URL = 'http://basketball.fantasysports.yahoo.com/nba'
@@ -36,10 +37,25 @@ def start_active_players(league_id, team_id, username, password):
     headers = {
         'user-agent': DESKTOP_USER_AGENT
     }
-    response = requests.get(team_url, headers=headers)
+    session = requests.Session()
+    response = session.get(team_url, headers=headers)
     soup = BeautifulSoup(response.text)
+
+    login_url = urlparse(response.url)
+    login_action = soup.find(id='mbr-login-form')['action']
+    login_form_url = '%s://%s%s' % (
+        login_url.scheme,
+        login_url.netloc,
+        login_action
+    )
+
     inputs = soup.find(id='hiddens').findAll('input')
     fields = {input['name']: input['value'] for input in inputs}
+    fields['username'] = username
+    fields['passwd'] = password
+
+    response = session.post(login_form_url, data=fields, headers=headers)
+    print(response.text)
 
 
 def main():
