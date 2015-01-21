@@ -14,6 +14,11 @@ DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
 
 
+def exit_with_message(msg, code=1):
+    sys.stderr.write(msg + '\n')
+    sys.exit(code)
+
+
 def usage():
     username = 'YAHOO_USERNAME=<username>'
     password = 'YAHOO_PASSWORD=<password>'
@@ -27,8 +32,7 @@ def usage():
         league_id,
         team_id
     ))
-    sys.stderr.write(msg + '\n')
-    sys.exit(1)
+    exit_with_message(msg)
 
 
 def start_active_players(league_id, team_id, username, password):
