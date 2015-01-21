@@ -25,10 +25,9 @@ def usage():
         password,
         sys.argv[0],
         league_id,
-        team_id,
-        '\n'
+        team_id
     ))
-    sys.stderr.write(msg)
+    sys.stderr.write(msg + '\n')
     sys.exit(1)
 
 
