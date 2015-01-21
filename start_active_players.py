@@ -14,7 +14,7 @@ DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
 
 
-def exit_with_message(msg, code=1):
+def exit_with_error(msg, code=1):
     sys.stderr.write(msg + '\n')
     sys.exit(code)
 
@@ -32,33 +32,63 @@ def usage():
         league_id,
         team_id
     ))
-    exit_with_message(msg)
+    exit_with_error(msg)
+
+
+def resolved_url_from_url(relative_url, source_url):
+    url_a = urlparse(source_url)
+    return '%s://%s%s' % (
+        url_a.scheme,
+        url_a.netloc,
+        relative_url
+    )
+
+
+def resolved_url_from_response(url, response, error_msg="URL not found"):
+    if url is None:
+        exit_with_error(error_msg)
+    return resolved_url_from_url(url, response.url)
 
 
 def start_active_players(league_id, team_id, username, password):
-    team_url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
+    session = requests.Session()
+
+    # Attempt to load team page
+    url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
     headers = {
         'user-agent': DESKTOP_USER_AGENT
     }
-    session = requests.Session()
-    response = session.get(team_url, headers=headers)
+    response = session.get(url, headers=headers)
+
+    # Login at redirected login page
     soup = BeautifulSoup(response.text)
-
-    login_url = urlparse(response.url)
-    login_action = soup.find(id='mbr-login-form')['action']
-    login_form_url = '%s://%s%s' % (
-        login_url.scheme,
-        login_url.netloc,
-        login_action
+    url = resolved_url_from_response(
+        soup.find(id='mbr-login-form')['action'],
+        response,
+        'Error: Login link not found'
     )
-
     inputs = soup.find(id='hiddens').findAll('input')
     fields = {input['name']: input['value'] for input in inputs}
     fields['username'] = username
     fields['passwd'] = password
+    response = session.post(url, data=fields, headers=headers)
 
-    response = session.post(login_form_url, data=fields, headers=headers)
-    print(response.text)
+    if response.url == url:
+        exit_with_error('Error: Login failed')
+
+    # Now on team page, press "Start Active Players" button
+    soup = BeautifulSoup(response.text)
+    url = resolved_url_from_response(
+        soup.find('a', href=True, text='Start Active Players')['href'],
+        response,
+        'Error: "Start Active Players" button not found'
+    )
+    response = session.get(url, headers=headers)
+
+    if 200 <= response.status_code < 300:
+        print('Started active players (though others may be on bench)!')
+    else:
+        exit_with_error('Error: Failed to start active players')
 
 
 def main():
