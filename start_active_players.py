@@ -16,6 +16,8 @@ YAHOO_URL = 'http://basketball.fantasysports.yahoo.com/nba'
 DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
 
+LOGIN_ERROR_MSG = 'Error: Login failed'
+
 
 def exit_with_error(msg, code=1):
     sys.stderr.write(msg + '\n')
@@ -55,6 +57,13 @@ def resolved_url_from_response(url, response, error_msg="URL not found"):
     return resolved_url_from_url(url, response.url)
 
 
+def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
+    try:
+        return element[attr]
+    except:
+        exit_with_error(error_msg)
+
+
 def start_active_players(league_id, team_id, username, password):
     session = requests.Session()
 
@@ -67,10 +76,15 @@ def start_active_players(league_id, team_id, username, password):
 
     # Login at redirected login page
     soup = BeautifulSoup(response.text)
+    url_path = attr_from_element_or_exit(
+        soup.find(id='mbr-login-form'),
+        'action',
+        LOGIN_ERROR_MSG + ': Unexpected login page'
+    )
     url = resolved_url_from_response(
-        soup.find(id='mbr-login-form')['action'],
+        url_path,
         response,
-        'Error: Login link not found'
+        LOGIN_ERROR_MSG + ': Login link not found'
     )
     inputs = soup.find(id='hiddens').findAll('input')
     fields = {input['name']: input['value'] for input in inputs}
@@ -78,16 +92,19 @@ def start_active_players(league_id, team_id, username, password):
     fields['passwd'] = password
     response = session.post(url, data=fields, headers=headers)
 
-    if response.url == url:
-        exit_with_error('Error: Login failed')
-
     # Now on team page, press "Start Active Players" button
     soup = BeautifulSoup(response.text)
+    url_path = attr_from_element_or_exit(
+        soup.find('a', href=True, text='Start Active Players'),
+        'href',
+        LOGIN_ERROR_MSG
+    )
     url = resolved_url_from_response(
-        soup.find('a', href=True, text='Start Active Players')['href'],
+        url_path,
         response,
         'Error: "Start Active Players" button not found'
     )
+
     response = session.get(url, headers=headers)
 
     if 200 <= response.status_code < 300:
