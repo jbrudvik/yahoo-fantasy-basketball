@@ -9,6 +9,9 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
 
+USERNAME_ENV = 'YAHOO_USERNAME'
+PASSWORD_ENV = 'YAHOO_PASSWORD'
+
 YAHOO_URL = 'http://basketball.fantasysports.yahoo.com/nba'
 DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
@@ -20,19 +23,21 @@ def exit_with_error(msg, code=1):
 
 
 def usage():
-    username = 'YAHOO_USERNAME=<username>'
-    password = 'YAHOO_PASSWORD=<password>'
     league_id = '<league_id>'
     team_id = '<team_id>'
-    msg = ' '.join((
-        'Usage:',
-        username,
-        password,
-        sys.argv[0],
-        league_id,
-        team_id
-    ))
-    exit_with_error(msg)
+    msg_lines = [
+        ' '.join((
+            'Usage:',
+            sys.argv[0],
+            league_id,
+            team_id
+        )),
+        'Environment variables %s and %s must also be set' % (
+            USERNAME_ENV,
+            PASSWORD_ENV
+        )
+    ]
+    exit_with_error('\n\n'.join(msg_lines))
 
 
 def resolved_url_from_url(relative_url, source_url):
@@ -92,8 +97,8 @@ def start_active_players(league_id, team_id, username, password):
 
 
 def main():
-    username = os.getenv('YAHOO_USERNAME')
-    password = os.getenv('YAHOO_PASSWORD')
+    username = os.getenv(USERNAME_ENV)
+    password = os.getenv(PASSWORD_ENV)
 
     if username is None or password is None or len(sys.argv) != 3:
         usage()

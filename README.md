@@ -10,10 +10,14 @@
 
     $ . venv/bin/activate
 
+## Authentication
+
+Set Yahoo! credentials in the `YAHOO_USERNAME` and `YAHOO_PASSWORD` [environment variables](http://en.wikipedia.org/wiki/Environment_variable#Assignment).
+
 ## Start active players
 
-    $ YAHOO_USERNAME=<username> YAHOO_PASSWORD=<password> python start-active-players.py <league_id> <team_id>
+    $ python start-active-players.py <league_id> <team_id>
 
 ## Project matchup
 
-    $ python project-matchup.py
+    $ python project-matchup.py <league_id> <team_id>
