@@ -12,6 +12,11 @@ from urllib.parse import urlparse
 USERNAME_ENV = 'YAHOO_USERNAME'
 PASSWORD_ENV = 'YAHOO_PASSWORD'
 
+MIN_ARGS = 3
+MAX_ARGS = 4
+REQUIRED_NUM_ARGS = range(MIN_ARGS, MAX_ARGS + 1)
+DEFAULT_NUM_DAYS = 1
+
 YAHOO_URL = 'http://basketball.fantasysports.yahoo.com/nba'
 DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
@@ -27,12 +32,14 @@ def exit_with_error(msg, code=1):
 def usage():
     league_id = '<league_id>'
     team_id = '<team_id>'
+    number_of_days = '<num_days (default: %d)>' % DEFAULT_NUM_DAYS
     msg_lines = [
         ' '.join((
             'Usage:',
             sys.argv[0],
             league_id,
-            team_id
+            team_id,
+            number_of_days
         )),
         'Environment variables %s and %s must also be set' % (
             USERNAME_ENV,
@@ -64,7 +71,7 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
         exit_with_error(error_msg)
 
 
-def start_active_players(league_id, team_id, username, password):
+def start_active_players(league_id, team_id, username, password, num_days):
     session = requests.Session()
 
     # Attempt to load team page
@@ -117,13 +124,23 @@ def main():
     username = os.getenv(USERNAME_ENV)
     password = os.getenv(PASSWORD_ENV)
 
-    if username is None or password is None or len(sys.argv) != 3:
+    missing_credentials = username is None or password is None
+    incorrect_num_args = len(sys.argv) not in REQUIRED_NUM_ARGS
+
+    if missing_credentials or incorrect_num_args:
         usage()
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
+    num_days = sys.argv[3] if len(sys.argv) > 3 else DEFAULT_NUM_DAYS
 
-    start_active_players(league_id, team_id, username, password)
+    start_active_players(
+        league_id,
+        team_id,
+        username,
+        password,
+        num_days
+    )
 
 
 if __name__ == '__main__':
