@@ -16,8 +16,8 @@ Set Yahoo! credentials in the `YAHOO_USERNAME` and `YAHOO_PASSWORD` [environment
 
 ## Start active players
 
-    $ python start-active-players.py <league_id> <team_id>
+    $ python start_active_players.py <league_id> <team_id>
 
 ## Project matchup
 
-    $ python project-matchup.py <league_id> <team_id>
+    $ python project_matchup.py <league_id> <team_id>
