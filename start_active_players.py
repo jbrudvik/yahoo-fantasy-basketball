@@ -15,12 +15,13 @@ PASSWORD_ENV = 'YAHOO_PASSWORD'
 DEFAULT_NUM_DAYS = 1
 
 # Command-line arguments
-league_id = '<league_id>'
-team_id = '<team_id>'
-number_of_days = '<num_days (default: %d)>' % DEFAULT_NUM_DAYS
-
-REQUIRED_ARGS = [league_id, team_id]
-OPTIONAL_ARGS = [number_of_days]
+REQUIRED_ARGS = [
+    '<league_id>',
+    '<team_id>'
+]
+OPTIONAL_ARGS = [
+    '<num_days (default: %d)>' % DEFAULT_NUM_DAYS
+]
 
 MIN_ARGS = len(REQUIRED_ARGS) + 1
 MAX_ARGS = MIN_ARGS + len(OPTIONAL_ARGS)
@@ -43,9 +44,8 @@ def usage():
         ' '.join((
             'Usage:',
             sys.argv[0],
-            league_id,
-            team_id,
-            number_of_days
+            ' '.join(REQUIRED_ARGS),
+            ' '.join(OPTIONAL_ARGS)
         )),
         'Environment variables %s and %s must also be set' % (
             USERNAME_ENV,
