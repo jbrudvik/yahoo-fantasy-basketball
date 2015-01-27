@@ -12,10 +12,19 @@ from urllib.parse import urlparse
 USERNAME_ENV = 'YAHOO_USERNAME'
 PASSWORD_ENV = 'YAHOO_PASSWORD'
 
-MIN_ARGS = 3
-MAX_ARGS = 4
-REQUIRED_NUM_ARGS = range(MIN_ARGS, MAX_ARGS + 1)
 DEFAULT_NUM_DAYS = 1
+
+# Command-line arguments
+league_id = '<league_id>'
+team_id = '<team_id>'
+number_of_days = '<num_days (default: %d)>' % DEFAULT_NUM_DAYS
+
+REQUIRED_ARGS = [league_id, team_id]
+OPTIONAL_ARGS = [number_of_days]
+
+MIN_ARGS = len(REQUIRED_ARGS) + 1
+MAX_ARGS = MIN_ARGS + len(OPTIONAL_ARGS)
+REQUIRED_NUM_ARGS = range(MIN_ARGS, MAX_ARGS + 1)
 
 YAHOO_URL = 'http://basketball.fantasysports.yahoo.com/nba'
 DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
@@ -30,9 +39,6 @@ def exit_with_error(msg, code=1):
 
 
 def usage():
-    league_id = '<league_id>'
-    team_id = '<team_id>'
-    number_of_days = '<num_days (default: %d)>' % DEFAULT_NUM_DAYS
     msg_lines = [
         ' '.join((
             'Usage:',
