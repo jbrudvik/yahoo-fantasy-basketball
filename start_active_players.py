@@ -13,6 +13,7 @@ USERNAME_ENV = 'YAHOO_USERNAME'
 PASSWORD_ENV = 'YAHOO_PASSWORD'
 
 DEFAULT_NUM_DAYS = 1
+NUM_DAYS_MAX = 100
 
 # Command-line arguments
 REQUIRED_ARGS = [
@@ -20,7 +21,7 @@ REQUIRED_ARGS = [
     '<team_id>'
 ]
 OPTIONAL_ARGS = [
-    '<num_days (default: %d)>' % DEFAULT_NUM_DAYS
+    '<num_days (default: %d, max: %d)>' % (DEFAULT_NUM_DAYS, NUM_DAYS_MAX)
 ]
 
 MIN_ARGS = len(REQUIRED_ARGS) + 1
@@ -138,7 +139,12 @@ def main():
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
-    num_days = sys.argv[3] if len(sys.argv) > 3 else DEFAULT_NUM_DAYS
+    try:
+        num_days = int(sys.argv[3] if len(sys.argv) > 3 else DEFAULT_NUM_DAYS)
+    except:
+        usage()
+    if num_days > NUM_DAYS_MAX:
+        usage()
 
     start_active_players(
         league_id,
