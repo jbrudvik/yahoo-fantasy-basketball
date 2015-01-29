@@ -110,6 +110,8 @@ def start_active_players(league_id, team_id, username, password, num_days):
 
     # Now on team page, press "Start Active Players" button
     soup = BeautifulSoup(response.text)
+    league, team = soup.find('title').text.split(' | ')[0].split(' - ')
+    print('%s - %s:' % (league, team))
     url_path = attr_from_element_or_exit(
         soup.find('a', href=True, text='Start Active Players'),
         'href',
