@@ -34,6 +34,7 @@ DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
 
 LOGIN_ERROR_MSG = 'Error: Login failed'
+UNKNOWN_ERROR_MSG = 'Failed to start players'
 
 
 def exit_with_error(msg, code=1):
@@ -167,7 +168,7 @@ def main():
             num_days
         )
     except:
-        exit_with_error('Unknown error')
+        exit_with_error(UNKNOWN_ERROR_MSG)
 
 
 if __name__ == '__main__':
