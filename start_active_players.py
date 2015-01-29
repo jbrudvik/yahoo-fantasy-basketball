@@ -2,6 +2,7 @@
 Start active players for the week
 """
 
+import moment
 import requests
 import os
 import sys
@@ -120,11 +121,22 @@ def start_active_players(league_id, team_id, username, password, num_days):
     )
 
     response = session.get(url, headers=headers)
+    date = attr_from_element_or_exit(
+        soup.find('input', attrs={'name': 'date'}),
+        'value',
+        LOGIN_ERROR_MSG
+    )
 
+    formatted_date = moment.date(date).format('ddd, MMM DD, YYYY')
     if 200 <= response.status_code < 300:
-        print('Started active players (though others may be on bench)!')
+        print(
+            '- %s: Started active players' %
+            formatted_date
+        )
     else:
-        exit_with_error('Error: Failed to start active players')
+        exit_with_error(
+            '- %s: Failed to start active players' % formatted_date
+        )
 
 
 def main():
