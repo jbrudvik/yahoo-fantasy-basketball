@@ -158,13 +158,16 @@ def main():
     if num_days > NUM_DAYS_MAX:
         usage()
 
-    start_active_players(
-        league_id,
-        team_id,
-        username,
-        password,
-        num_days
-    )
+    try:
+        start_active_players(
+            league_id,
+            team_id,
+            username,
+            password,
+            num_days
+        )
+    except:
+        exit_with_error('Unknown error')
 
 
 if __name__ == '__main__':
