@@ -122,20 +122,37 @@ def start_active_players(league_id, team_id, username, password, num_days):
         response,
         'Error: "Start Active Players" button not found'
     )
-
     response = session.get(url, headers=headers)
+
+    # Show results "Start Active Players"
+    soup = BeautifulSoup(response.text)
     date = attr_from_element_or_exit(
         soup.find('input', attrs={'name': 'date'}),
         'value',
         LOGIN_ERROR_MSG
     )
-
     formatted_date = moment.date(date).format('ddd, MMM DD, YYYY')
+
+    bench = soup.find_all('tr', class_='bench')
+    bench_bios = [p.find('div', class_='ysf-player-name') for p in bench]
+    names = [p.find('a').text for p in bench_bios]
+    details = [p.find('span').text for p in bench_bios]
+    opponents = [p.find_all('td', recursive=False)[3].text for p in bench]
+    players = [{'name': n, 'details': d, 'opponent': o}
+               for (n, d, o) in zip(names, details, opponents)]
+    alternates = [p for p in players if len(p['opponent']) > 0]
+
     if 200 <= response.status_code < 300:
         print(
             '- %s: Started active players' %
             formatted_date
         )
+        for player in alternates:
+            print('    - Alternate: %s (%s) [%s]' % (
+                player['name'],
+                player['details'],
+                player['opponent']
+            ))
     else:
         exit_with_error(
             '- %s: Failed to start active players' % formatted_date
