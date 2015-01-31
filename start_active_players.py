@@ -13,7 +13,6 @@ from urllib.parse import urlparse
 USERNAME_ENV = 'YAHOO_USERNAME'
 PASSWORD_ENV = 'YAHOO_PASSWORD'
 
-DEFAULT_NUM_DAYS = 1
 NUM_DAYS_MAX = 100
 
 # Command-line arguments
@@ -22,7 +21,8 @@ REQUIRED_ARGS = [
     '<team_id>'
 ]
 OPTIONAL_ARGS = [
-    '<num_days (default: %d, max: %d)>' % (DEFAULT_NUM_DAYS, NUM_DAYS_MAX)
+    '<date (default: today, format: YYYY-MM-DD)>',
+    '<num_days (default: 1, max: %d)>' % NUM_DAYS_MAX
 ]
 
 MIN_ARGS = len(REQUIRED_ARGS) + 1
@@ -80,11 +80,16 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
         exit_with_error(error_msg)
 
 
-def start_active_players(league_id, team_id, username, password, num_days):
+def start_active_players(league_id, team_id, username, password,
+                         date=None, num_days=1):
     session = requests.Session()
 
     # Attempt to load team page
     url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
+
+    if date is not None:
+        url += 'team?&date=%s' % date
+
     headers = {
         'user-agent': DESKTOP_USER_AGENT
     }
@@ -171,21 +176,26 @@ def main():
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
-    try:
-        num_days = int(sys.argv[3] if len(sys.argv) > 3 else DEFAULT_NUM_DAYS)
-    except:
-        usage()
-    if num_days > NUM_DAYS_MAX:
-        usage()
+
+    date = None
+    if len(sys.argv) > 3:
+        try:
+            date = moment.date(sys.argv[3]).format('YYYY-MM-DD')
+        except:
+            usage()
+
+    num_days = None
+    if len(sys.argv) > 4:
+        try:
+            num_days = int(sys.argv[4])
+        except:
+            usage()
+        if num_days > NUM_DAYS_MAX:
+            usage()
 
     try:
-        start_active_players(
-            league_id,
-            team_id,
-            username,
-            password,
-            num_days
-        )
+        start_active_players(league_id, team_id, username, password,
+                             date, num_days)
     except:
         exit_with_error(UNKNOWN_ERROR_MSG)
 
