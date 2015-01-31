@@ -164,6 +164,27 @@ def start_active_players(league_id, team_id, username, password,
         )
 
 
+def parse_date(i):
+    if len(sys.argv) > i:
+        try:
+            return moment.date(sys.argv[i]).format('YYYY-MM-DD')
+        except:
+            return None
+    else:
+        return None
+
+
+def parse_num_days(i):
+    if len(sys.argv) > i:
+        try:
+            return int(sys.argv[i])
+        except:
+            usage()
+        if num_days > NUM_DAYS_MAX:
+            usage()
+    return None
+
+
 def main():
     username = os.getenv(USERNAME_ENV)
     password = os.getenv(PASSWORD_ENV)
@@ -176,22 +197,8 @@ def main():
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
-
-    date = None
-    if len(sys.argv) > 3:
-        try:
-            date = moment.date(sys.argv[3]).format('YYYY-MM-DD')
-        except:
-            usage()
-
-    num_days = None
-    if len(sys.argv) > 4:
-        try:
-            num_days = int(sys.argv[4])
-        except:
-            usage()
-        if num_days > NUM_DAYS_MAX:
-            usage()
+    date = parse_date(3)
+    num_days = parse_num_days(3 if date is None else 4)
 
     try:
         start_active_players(league_id, team_id, username, password,
