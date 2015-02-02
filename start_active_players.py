@@ -167,7 +167,11 @@ def start_active_players(league_id, team_id, username, password,
 def parse_date(i):
     if len(sys.argv) > i:
         try:
-            return moment.date(sys.argv[i]).format('YYYY-MM-DD')
+            date = moment.date(sys.argv[i]).format('YYYY-MM-DD')
+            today = moment.date(moment.now().format('YYYY-MM-DD'))
+            if date < today:
+                return None
+            return date
         except:
             return None
     else:
