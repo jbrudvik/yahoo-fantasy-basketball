@@ -2,17 +2,18 @@
 Start active players for the week
 """
 
-import moment
 import requests
 import os
 import sys
 from bs4 import BeautifulSoup
+from datetime import datetime, date, timedelta
 from urllib.parse import urlparse
 
 
 USERNAME_ENV = 'YAHOO_USERNAME'
 PASSWORD_ENV = 'YAHOO_PASSWORD'
 
+DATE_LIMIT = date.today() + timedelta(days=365)
 NUM_DAYS_MAX = 100
 
 # Command-line arguments
@@ -21,7 +22,7 @@ REQUIRED_ARGS = [
     '<team_id>'
 ]
 OPTIONAL_ARGS = [
-    '<date (default: today, format: YYYY-MM-DD)>',
+    '<date (default: today, max: %s)>' % DATE_LIMIT.strftime('%Y-%m-%d'),
     '<num_days (default: 1, max: %d)>' % NUM_DAYS_MAX
 ]
 
@@ -81,14 +82,14 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
 
 
 def start_active_players(league_id, team_id, username, password,
-                         date=None, num_days=1):
+                         start_date=None, num_days=1):
     session = requests.Session()
 
     # Attempt to load team page
     url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
 
-    if date is not None:
-        url += 'team?&date=%s' % date
+    if start_date is not None:
+        url += 'team?&date=%s' % start_date
 
     headers = {
         'user-agent': DESKTOP_USER_AGENT
@@ -131,12 +132,14 @@ def start_active_players(league_id, team_id, username, password,
 
     # Show results "Start Active Players"
     soup = BeautifulSoup(response.text)
-    date = attr_from_element_or_exit(
+
+    page_date = attr_from_element_or_exit(
         soup.find('input', attrs={'name': 'date'}),
         'value',
         LOGIN_ERROR_MSG
     )
-    formatted_date = moment.date(date).format('ddd, MMM DD, YYYY')
+    parsed_date = datetime.strptime(page_date, '%Y-%m-%d')
+    formatted_date = parsed_date.strftime('%a, %b %m, %Y')
 
     bench = soup.find_all('tr', class_='bench')
     bench_bios = [p.find('div', class_='ysf-player-name') for p in bench]
@@ -167,11 +170,9 @@ def start_active_players(league_id, team_id, username, password,
 def parse_date(i):
     if len(sys.argv) > i:
         try:
-            date = moment.date(sys.argv[i]).format('YYYY-MM-DD')
-            today = moment.date(moment.now().format('YYYY-MM-DD'))
-            if date < today:
-                return None
-            return date
+            input_date = datetime.strptime(sys.argv[i], '%Y-%m-%d').date()
+            today = date.today()
+            return input_date if today <= input_date <= DATE_LIMIT else None
         except:
             return None
     else:
@@ -201,12 +202,12 @@ def main():
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
-    date = parse_date(3)
-    num_days = parse_num_days(3 if date is None else 4)
+    start_date = parse_date(3)  # TODO: Don't use `date` here
+    num_days = parse_num_days(3 if start_date is None else 4)
 
     try:
         start_active_players(league_id, team_id, username, password,
-                             date, num_days)
+                             start_date, num_days)
     except:
         exit_with_error(UNKNOWN_ERROR_MSG)
 
