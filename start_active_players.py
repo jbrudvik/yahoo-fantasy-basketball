@@ -139,7 +139,7 @@ def start_active_players(league_id, team_id, username, password,
         LOGIN_ERROR_MSG
     )
     parsed_date = datetime.strptime(page_date, '%Y-%m-%d')
-    formatted_date = parsed_date.strftime('%a, %b %m, %Y')
+    formatted_date = parsed_date.strftime('%a, %b %d, %Y')
 
     bench = soup.find_all('tr', class_='bench')
     bench_bios = [p.find('div', class_='ysf-player-name') for p in bench]
