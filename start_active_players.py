@@ -91,6 +91,43 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
         exit_with_error(error_msg)
 
 
+def show_start_active_players_results(response):
+    if not (200 <= response.status_code < 300):
+        exit_with_error(
+            '- %s: Failed to start active players' % formatted_date
+        )
+
+    soup = BeautifulSoup(response.text)
+
+    # Parse date
+    page_date = attr_from_element_or_exit(
+        soup.find('input', attrs={'name': 'date'}),
+        'value',
+        LOGIN_ERROR_MSG
+    )
+    parsed_date = datetime.strptime(page_date, '%Y-%m-%d')
+    formatted_date = parsed_date.strftime('%a, %b %d, %Y')
+
+    # Parse bench
+    bench = soup.find_all('tr', class_='bench')
+    bench_bios = [p.find('div', class_='ysf-player-name') for p in bench]
+    names = [p.find('a').text for p in bench_bios]
+    details = [p.find('span').text for p in bench_bios]
+    opponents = [p.find_all('td', recursive=False)[3].text for p in bench]
+    players = [{'name': n, 'details': d, 'opponent': o}
+               for (n, d, o) in zip(names, details, opponents)]
+    alternates = [p for p in players if len(p['opponent']) > 0]
+
+    # Show results
+    print('- %s: Started active players' % formatted_date)
+    for player in alternates:
+        print('    - Alternate: %s (%s) [%s]' % (
+            player['name'],
+            player['details'],
+            player['opponent']
+        ))
+
+
 def login(league_id, team_id, username, password):
     session = requests.Session()
 
@@ -143,42 +180,7 @@ def start_active_players(session, league_id, team_id,
         'Error: "Start Active Players" button not found'
     )
     response = session.get(url, headers=YAHOO_HEADERS)
-
-    # Show results after starting players
-    soup = BeautifulSoup(response.text)
-
-    page_date = attr_from_element_or_exit(
-        soup.find('input', attrs={'name': 'date'}),
-        'value',
-        LOGIN_ERROR_MSG
-    )
-    parsed_date = datetime.strptime(page_date, '%Y-%m-%d')
-    formatted_date = parsed_date.strftime('%a, %b %d, %Y')
-
-    bench = soup.find_all('tr', class_='bench')
-    bench_bios = [p.find('div', class_='ysf-player-name') for p in bench]
-    names = [p.find('a').text for p in bench_bios]
-    details = [p.find('span').text for p in bench_bios]
-    opponents = [p.find_all('td', recursive=False)[3].text for p in bench]
-    players = [{'name': n, 'details': d, 'opponent': o}
-               for (n, d, o) in zip(names, details, opponents)]
-    alternates = [p for p in players if len(p['opponent']) > 0]
-
-    if 200 <= response.status_code < 300:
-        print(
-            '- %s: Started active players' %
-            formatted_date
-        )
-        for player in alternates:
-            print('    - Alternate: %s (%s) [%s]' % (
-                player['name'],
-                player['details'],
-                player['opponent']
-            ))
-    else:
-        exit_with_error(
-            '- %s: Failed to start active players' % formatted_date
-        )
+    show_start_active_players_results(response)
 
 
 def parse_date(i):
