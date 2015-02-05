@@ -41,6 +41,10 @@ LOGIN_ERROR_MSG = 'Error: Login failed'
 UNKNOWN_ERROR_MSG = 'Failed to start players'
 
 
+#
+# Command-line utilities
+#
+
 def exit_with_error(msg, code=1):
     sys.stderr.write(msg + '\n')
     sys.exit(code)
@@ -61,6 +65,33 @@ def usage():
     ]
     exit_with_error('\n\n'.join(msg_lines))
 
+
+def date_from_argv(i):
+    if len(sys.argv) > i:
+        try:
+            input_date = datetime.strptime(sys.argv[i], '%Y-%m-%d').date()
+            today = date.today()
+            return input_date if today <= input_date <= DATE_LIMIT else None
+        except:
+            return None
+    else:
+        return None
+
+
+def num_days_from_argv(i):
+    if len(sys.argv) > i:
+        try:
+            return int(sys.argv[i])
+        except:
+            usage()
+        if num_days > NUM_DAYS_MAX:
+            usage()
+    return None
+
+
+#
+#
+#
 
 def team_url(league_id, team_id, start_date=None):
     url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
@@ -191,8 +222,7 @@ def login(league_id, team_id, username, password):
     return session
 
 
-def start_active_players(session, league_id, team_id,
-                         start_date=None, num_days=1):
+def start_active_players(session, league_id, team_id, start_date=None):
     # Load team page
     response = session.get(team_url(league_id, team_id, start_date),
                            headers=YAHOO_HEADERS)
@@ -203,29 +233,6 @@ def start_active_players(session, league_id, team_id,
 
     # Show results of starting active players
     show_start_active_players_results(response)
-
-
-def parse_date(i):
-    if len(sys.argv) > i:
-        try:
-            input_date = datetime.strptime(sys.argv[i], '%Y-%m-%d').date()
-            today = date.today()
-            return input_date if today <= input_date <= DATE_LIMIT else None
-        except:
-            return None
-    else:
-        return None
-
-
-def parse_num_days(i):
-    if len(sys.argv) > i:
-        try:
-            return int(sys.argv[i])
-        except:
-            usage()
-        if num_days > NUM_DAYS_MAX:
-            usage()
-    return None
 
 
 def main():
@@ -240,12 +247,19 @@ def main():
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
-    start_date = parse_date(3)  # TODO: Don't use `date` here
+    start_date = parse_date(3)
     num_days = parse_num_days(3 if start_date is None else 4)
+
+    # TODO: If num_days is None handle as just 1 (i.e., don't iterate)
 
     try:
         session = login(league_id, team_id, username, password)
-        start_active_players(session, league_id, team_id, start_date, num_days)
+
+        # TODO: Instead of recursing inside, iterate from here
+        # - Drop the num_days argument to start_active_players -- not needed
+        # - Just loop over from here, and everything else should work
+
+        start_active_players(session, league_id, team_id, start_date)
     except:
         exit_with_error(UNKNOWN_ERROR_MSG)
 
