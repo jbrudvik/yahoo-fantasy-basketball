@@ -143,6 +143,7 @@ def show_start_active_players_results(response):
 
 
 def login(league_id, team_id, username, password):
+    # Create session to maintain logged-in status
     session = requests.Session()
 
     # Attempt to load team page
