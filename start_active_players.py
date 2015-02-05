@@ -119,7 +119,7 @@ def login(league_id, team_id, username, password):
     # Show league, team info
     soup = BeautifulSoup(response.text)
     league, team = soup.find('title').text.split(' | ')[0].split(' - ')
-    print('%s - %s:' % (league, team))
+    print('%s - %s:\n' % (league, team))
 
     return session
 
