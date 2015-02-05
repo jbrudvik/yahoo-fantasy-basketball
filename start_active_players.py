@@ -33,6 +33,9 @@ REQUIRED_NUM_ARGS = range(MIN_ARGS, MAX_ARGS + 1)
 YAHOO_URL = 'http://basketball.fantasysports.yahoo.com/nba'
 DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
+YAHOO_HEADERS = {
+    'user-agent': DESKTOP_USER_AGENT
+}
 
 LOGIN_ERROR_MSG = 'Error: Login failed'
 UNKNOWN_ERROR_MSG = 'Failed to start players'
@@ -59,6 +62,13 @@ def usage():
     exit_with_error('\n\n'.join(msg_lines))
 
 
+def team_url(league_id, team_id, start_date=None):
+    url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
+    if start_date is not None:
+        url += 'team?&date=%s' % start_date
+    return url
+
+
 def resolved_url_from_url(relative_url, source_url):
     url_a = urlparse(source_url)
     return '%s://%s%s' % (
@@ -81,20 +91,12 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
         exit_with_error(error_msg)
 
 
-def start_active_players(league_id, team_id, username, password,
-                         start_date=None, num_days=1):
+def login(league_id, team_id, username, password):
     session = requests.Session()
 
     # Attempt to load team page
-    url = '%s/%s/%s/' % (YAHOO_URL, league_id, team_id)
-
-    if start_date is not None:
-        url += 'team?&date=%s' % start_date
-
-    headers = {
-        'user-agent': DESKTOP_USER_AGENT
-    }
-    response = session.get(url, headers=headers)
+    url = team_url(league_id, team_id)
+    response = session.get(url, headers=YAHOO_HEADERS)
 
     # Login at redirected login page
     soup = BeautifulSoup(response.text)
@@ -112,12 +114,24 @@ def start_active_players(league_id, team_id, username, password,
     fields = {input['name']: input['value'] for input in inputs}
     fields['username'] = username
     fields['passwd'] = password
-    response = session.post(url, data=fields, headers=headers)
+    response = session.post(url, data=fields, headers=YAHOO_HEADERS)
 
-    # Now on team page, press "Start Active Players" button
+    # Show league, team info
     soup = BeautifulSoup(response.text)
     league, team = soup.find('title').text.split(' | ')[0].split(' - ')
     print('%s - %s:' % (league, team))
+
+    return session
+
+
+def start_active_players(session, league_id, team_id,
+                         start_date=None, num_days=1):
+    # Load team page
+    url = team_url(league_id, team_id, start_date)
+    response = session.get(url, headers=YAHOO_HEADERS)
+
+    # On team page, press "Start Active Players" button
+    soup = BeautifulSoup(response.text)
     url_path = attr_from_element_or_exit(
         soup.find('a', href=True, text='Start Active Players'),
         'href',
@@ -128,9 +142,9 @@ def start_active_players(league_id, team_id, username, password,
         response,
         'Error: "Start Active Players" button not found'
     )
-    response = session.get(url, headers=headers)
+    response = session.get(url, headers=YAHOO_HEADERS)
 
-    # Show results "Start Active Players"
+    # Show results after starting players
     soup = BeautifulSoup(response.text)
 
     page_date = attr_from_element_or_exit(
@@ -206,8 +220,8 @@ def main():
     num_days = parse_num_days(3 if start_date is None else 4)
 
     try:
-        start_active_players(league_id, team_id, username, password,
-                             start_date, num_days)
+        session = login(league_id, team_id, username, password)
+        start_active_players(session, league_id, team_id, start_date, num_days)
     except:
         exit_with_error(UNKNOWN_ERROR_MSG)
 
