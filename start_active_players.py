@@ -91,6 +91,20 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
         exit_with_error(error_msg)
 
 
+def start_active_players_button(response):
+    soup = BeautifulSoup(response.text)
+    url_path = attr_from_element_or_exit(
+        soup.find('a', href=True, text='Start Active Players'),
+        'href',
+        LOGIN_ERROR_MSG
+    )
+    return resolved_url_from_response(
+        url_path,
+        response,
+        'Error: "Start Active Players" button not found'
+    )
+
+
 def show_start_active_players_results(response):
     if not (200 <= response.status_code < 300):
         exit_with_error(
@@ -167,18 +181,8 @@ def start_active_players(session, league_id, team_id,
     url = team_url(league_id, team_id, start_date)
     response = session.get(url, headers=YAHOO_HEADERS)
 
-    # On team page, press "Start Active Players" button
-    soup = BeautifulSoup(response.text)
-    url_path = attr_from_element_or_exit(
-        soup.find('a', href=True, text='Start Active Players'),
-        'href',
-        LOGIN_ERROR_MSG
-    )
-    url = resolved_url_from_response(
-        url_path,
-        response,
-        'Error: "Start Active Players" button not found'
-    )
+    # On team page, press "Start Active Players button"
+    url = start_active_players_button(response)
     response = session.get(url, headers=YAHOO_HEADERS)
     show_start_active_players_results(response)
 
