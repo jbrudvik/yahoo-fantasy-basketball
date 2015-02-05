@@ -1,4 +1,4 @@
-# Scripts for Yahoo! fantasy basketball
+# Scripts for Yahoo fantasy basketball
 
 ## Install dependencies
 
@@ -12,7 +12,7 @@
 
 ## Authentication
 
-Set Yahoo! credentials in the `YAHOO_USERNAME` and `YAHOO_PASSWORD` [environment variables](http://en.wikipedia.org/wiki/Environment_variable#Assignment).
+Set Yahoo credentials in the `YAHOO_USERNAME` and `YAHOO_PASSWORD` [environment variables](http://en.wikipedia.org/wiki/Environment_variable#Assignment).
 
 ## Start active players
 
