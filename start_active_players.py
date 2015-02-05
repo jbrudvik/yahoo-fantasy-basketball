@@ -147,8 +147,8 @@ def login(league_id, team_id, username, password):
     session = requests.Session()
 
     # Attempt to load team page
-    url = team_url(league_id, team_id)
-    response = session.get(url, headers=YAHOO_HEADERS)
+    response = session.get(team_url(league_id, team_id),
+                           headers=YAHOO_HEADERS)
 
     # Login at redirected login page
     soup = BeautifulSoup(response.text)
@@ -179,12 +179,11 @@ def login(league_id, team_id, username, password):
 def start_active_players(session, league_id, team_id,
                          start_date=None, num_days=1):
     # Load team page
-    url = team_url(league_id, team_id, start_date)
-    response = session.get(url, headers=YAHOO_HEADERS)
-
+    response = session.get(team_url(league_id, team_id, start_date),
+                           headers=YAHOO_HEADERS)
     # On team page, press "Start Active Players button"
-    url = start_active_players_button(response)
-    response = session.get(url, headers=YAHOO_HEADERS)
+    response = session.get(start_active_players_button(response),
+                           headers=YAHOO_HEADERS)
     show_start_active_players_results(response)
 
 
