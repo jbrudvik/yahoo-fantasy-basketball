@@ -91,6 +91,30 @@ def attr_from_element_or_exit(element, attr, error_msg="Attribute not found"):
         exit_with_error(error_msg)
 
 
+def login_url(response):
+    soup = BeautifulSoup(response.text)
+    url_path = attr_from_element_or_exit(
+        soup.find(id='mbr-login-form'),
+        'action',
+        LOGIN_ERROR_MSG + ': Unexpected login page'
+    )
+    url = resolved_url_from_response(
+        url_path,
+        response,
+        LOGIN_ERROR_MSG + ': Login link not found'
+    )
+    return url
+
+
+def login_post_data(response, username, password):
+    soup = BeautifulSoup(response.text)
+    inputs = soup.find(id='hiddens').findAll('input')
+    post_data = {input['name']: input['value'] for input in inputs}
+    post_data['username'] = username
+    post_data['passwd'] = password
+    return post_data
+
+
 def start_active_players_button(response):
     soup = BeautifulSoup(response.text)
     url_path = attr_from_element_or_exit(
@@ -103,6 +127,12 @@ def start_active_players_button(response):
         response,
         'Error: "Start Active Players" button not found'
     )
+
+
+def show_team_info(response):
+    soup = BeautifulSoup(response.text)
+    league, team = soup.find('title').text.split(' | ')[0].split(' - ')
+    print('%s - %s:\n' % (league, team))
 
 
 def show_start_active_players_results(response):
@@ -151,27 +181,12 @@ def login(league_id, team_id, username, password):
                            headers=YAHOO_HEADERS)
 
     # Login at redirected login page
-    soup = BeautifulSoup(response.text)
-    url_path = attr_from_element_or_exit(
-        soup.find(id='mbr-login-form'),
-        'action',
-        LOGIN_ERROR_MSG + ': Unexpected login page'
-    )
-    url = resolved_url_from_response(
-        url_path,
-        response,
-        LOGIN_ERROR_MSG + ': Login link not found'
-    )
-    inputs = soup.find(id='hiddens').findAll('input')
-    fields = {input['name']: input['value'] for input in inputs}
-    fields['username'] = username
-    fields['passwd'] = password
-    response = session.post(url, data=fields, headers=YAHOO_HEADERS)
+    response = session.post(login_url(response),
+                            data=login_post_data(response, username, password),
+                            headers=YAHOO_HEADERS)
 
     # Show league, team info
-    soup = BeautifulSoup(response.text)
-    league, team = soup.find('title').text.split(' | ')[0].split(' - ')
-    print('%s - %s:\n' % (league, team))
+    show_team_info(response)
 
     return session
 
@@ -181,9 +196,12 @@ def start_active_players(session, league_id, team_id,
     # Load team page
     response = session.get(team_url(league_id, team_id, start_date),
                            headers=YAHOO_HEADERS)
+
     # On team page, press "Start Active Players button"
     response = session.get(start_active_players_button(response),
                            headers=YAHOO_HEADERS)
+
+    # Show results of starting active players
     show_start_active_players_results(response)
 
 
