@@ -18,6 +18,21 @@ Set Yahoo credentials in the `YAHOO_USERNAME` and `YAHOO_PASSWORD` [environment 
 
     $ python start_active_players.py <league_id> <team_id> <date (default: today, max: 2016-02-05)> <num_days (default: 1, max: 100)>
 
+Example with output:
+
+    $ python start_active_players.py 847591 8 2015-03-03 7
+    Superteams League - Lamarc Gasolridge's Team:
+
+    - Tue, Mar 03, 2015: Started active players
+    - Wed, Mar 04, 2015: Started active players
+    - Thu, Mar 05, 2015: Started active players
+    - Fri, Mar 06, 2015: Started active players
+        - Alternate: DeMarcus Cousins (Sac - PF,C) [@Orl]
+        - Alternate: Dennis Schroder (Atl - PG) [Cle]
+    - Sat, Mar 07, 2015: Started active players
+    - Sun, Mar 08, 2015: Started active players
+    - Mon, Mar 09, 2015: Started active players
+
 ## Project matchup
 
     $ python project_matchup.py <league_id> <team_id>
