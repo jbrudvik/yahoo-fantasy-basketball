@@ -83,7 +83,7 @@ def num_days_from_argv(i):
             usage()
         if num_days > NUM_DAYS_MAX:
             usage()
-    return None
+    return 1
 
 
 def login(session, league_id, team_id, username, password):
@@ -148,6 +148,8 @@ def main():
     team_id = sys.argv[2]
     start_date = date_from_argv(3)
     num_days = num_days_from_argv(3 if start_date is None else 4)
+    if start_date is None:
+        start_date = date.today()
 
     # Create session for maintaining logged-in status, necessary headers
     session = requests.Session()
@@ -160,7 +162,9 @@ def main():
 
     try:
         output_team_info(session, league_id, team_id)
-        start_active_players(session, league_id, team_id, start_date)
+        for _ in range(num_days):
+            start_active_players(session, league_id, team_id, start_date)
+            start_date = start_date + timedelta(days=1)
     except:
         sys.exit(START_PLAYERS_ERROR_MSG)
 
