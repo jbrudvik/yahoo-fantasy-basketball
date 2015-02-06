@@ -24,35 +24,6 @@ OPTIONAL_ARGS.extend([
 START_PLAYERS_ERROR_MSG = 'Failed to start players'
 
 
-def date_from_argv(i):
-    """
-    Parse date from command-line args
-    """
-    if len(sys.argv) > i:
-        try:
-            input_date = datetime.strptime(sys.argv[i], '%Y-%m-%d').date()
-            today = date.today()
-            return input_date if today <= input_date <= DATE_LIMIT else None
-        except:
-            return None
-    else:
-        return None
-
-
-def num_days_from_argv(i):
-    """
-    Parse num_days from command-line args
-    """
-    if len(sys.argv) > i:
-        try:
-            return int(sys.argv[i])
-        except:
-            usage()
-        if num_days > NUM_DAYS_MAX:
-            usage()
-    return 1
-
-
 def start_active_players(session, league_id, team_id, start_date=None):
     """
     Start active players and output results
@@ -92,8 +63,8 @@ def main():
 
     league_id = sys.argv[1]
     team_id = sys.argv[2]
-    start_date = date_from_argv(3)
-    num_days = num_days_from_argv(3 if start_date is None else 4)
+    start_date = date_from_argv(3, DATE_LIMIT)
+    num_days = int_from_argv(3 if start_date is None else 4, NUM_DAYS_MAX)
     if start_date is None:
         start_date = date.today()
 
