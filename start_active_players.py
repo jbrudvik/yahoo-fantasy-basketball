@@ -33,13 +33,6 @@ REQUIRED_NUM_ARGS = range(MIN_ARGS, MAX_ARGS + 1)
 LOGIN_ERROR_MSG = 'Failed to log in'
 START_PLAYERS_ERROR_MSG = 'Failed to start players'
 
-# HTTP headers
-DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)\
-AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36'
-HEADERS = {
-    'user-agent': DESKTOP_USER_AGENT
-}
-
 
 def usage():
     """
@@ -153,7 +146,7 @@ def main():
 
     # Create session for maintaining logged-in status, necessary headers
     session = requests.Session()
-    session.headers.update(HEADERS)
+    session.headers.update(ys.login.headers())
 
     try:
         login(session, league_id, team_id, username, password)
