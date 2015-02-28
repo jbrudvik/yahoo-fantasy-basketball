@@ -3,7 +3,6 @@ Start active players for a range of dates
 """
 
 import os
-import requests
 import sys
 import yahooscraper as ys
 
@@ -71,12 +70,8 @@ def main():
     if num_days is None:
         num_days = NUM_DAYS_DEFAULT
 
-    # Create session for maintaining logged-in status, necessary headers
-    session = requests.Session()
-    session.headers.update(ys.login.headers())
-
     try:
-        login(session, username, password)
+        session = ys.login.authenticated_session(username, password)
     except:
         sys.exit(LOGIN_ERROR_MSG)
 

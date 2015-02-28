@@ -3,11 +3,9 @@ Project results of the current matchup
 """
 
 import os
-import requests
 import sys
 import yahooscraper as ys
 
-from urllib.parse import urljoin
 from utils import *
 
 
@@ -23,12 +21,8 @@ def main():
     league_id = sys.argv[1]
     team_id = sys.argv[2]
 
-    # Create session for maintaining logged-in status, necessary headers
-    session = requests.Session()
-    session.headers.update(ys.login.headers())
-
     try:
-        login(session, username, password)
+        session = ys.login.authenticated_session(username, password)
     except:
         sys.exit(LOGIN_ERROR_MSG)
 

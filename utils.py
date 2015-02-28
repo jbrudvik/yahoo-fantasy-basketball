@@ -72,17 +72,6 @@ def int_from_argv(i, max, min=1):
     return parsed_and_bounded_arg(i, max, min, lambda arg: int(arg))
 
 
-def login(session, username, password):
-    """
-    Log in to Yahoo
-    """
-    response = session.get(ys.login.url())
-    login_path = ys.login.path(response.text)
-    login_url = urljoin(response.url, login_path)
-    login_post_data = ys.login.post_data(response.text, username, password)
-    session.post(login_url, data=login_post_data)
-
-
 def output_team_info(session, league_id, team_id):
     """
     Output team name and league
