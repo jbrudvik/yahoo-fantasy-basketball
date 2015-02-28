@@ -14,10 +14,11 @@ from utils import *
 
 # Command-line args
 DATE_LIMIT = date.today() + timedelta(days=365)
+NUM_DAYS_DEFAULT = 1
 NUM_DAYS_MAX = 100
 OPTIONAL_ARGS.extend([
     '<date (default: today, max: %s)>' % DATE_LIMIT.strftime('%Y-%m-%d'),
-    '<num_days (default: 1, max: %d)>' % NUM_DAYS_MAX
+    '<num_days (default: %d, max: %d)>' % (NUM_DAYS_DEFAULT, NUM_DAYS_MAX)
 ])
 
 # Error messages
@@ -67,6 +68,8 @@ def main():
     num_days = int_from_argv(3 if start_date is None else 4, NUM_DAYS_MAX)
     if start_date is None:
         start_date = date.today()
+    if num_days is None:
+        num_days = NUM_DAYS_DEFAULT
 
     # Create session for maintaining logged-in status, necessary headers
     session = requests.Session()
