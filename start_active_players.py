@@ -76,7 +76,7 @@ def main():
     session.headers.update(ys.login.headers())
 
     try:
-        login(session, league_id, team_id, username, password)
+        login(session, username, password)
     except:
         sys.exit(LOGIN_ERROR_MSG)
 

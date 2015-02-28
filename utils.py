@@ -72,7 +72,7 @@ def int_from_argv(i, max, min=1):
     return parsed_and_bounded_arg(i, max, min, lambda arg: int(arg))
 
 
-def login(session, league_id, team_id, username, password):
+def login(session, username, password):
     """
     Log in to Yahoo
     """
